@@ -1,0 +1,26 @@
+<script src="binding/script.js"></script>
+
+<div data-with="{'userx': user}">
+  <div data-text="userx.name"></div>
+</div>
+
+<script>
+var o = convert({
+  user: {
+    name: 'wow'
+  }
+}, true)
+
+bind(o)
+
+setTimeout(function () {
+  o.user.prop('name', 'WAW')
+}, 1000)
+setTimeout(function () {
+  o.prop({
+    user: {
+      name: 'wooo'
+    }
+  })
+}, 2000)
+</script>

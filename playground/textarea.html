@@ -1,0 +1,35 @@
+<body>
+<textarea id="editor" cols="80" rows="8">aaa
+bbb
+ccc</textarea>
+<script>
+
+function codeEditor (t) {
+  t.addEventListener('keydown', function (e) {
+    if (e.keyCode === 9) {
+      e.preventDefault()
+      var start = t.selectionStart
+      var end = t.selectionEnd
+      var value = t.value
+      if (end - start > 0) {
+        if (value.substring(start, start - 1) === '\n' || start === 0) {
+          var addition = 0
+          t.value = value.substring(0, start) + value.substring(start, end).replace(/^./gm, function (all) {
+            addition += 2
+            return '  ' + all
+          }) + value.substring(end)
+          t.selectionStart = start
+          t.selectionEnd = end + addition
+          return
+        }
+      }
+      t.value = t.value.substr(0, start) + '  ' + t.value.substr(end)
+      t.selectionStart = start + 2
+      t.selectionEnd = start + 2
+    }
+  }, false)
+}
+
+codeEditor(editor)
+
+</script>

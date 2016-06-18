@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>QUnit Test</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" href="styles/qunit-1.23.1.css">
+  </head>
+  <body>
+    <div id="qunit"></div>
+    <div id="qunit-fixture"></div>
+    <script src="scripts/jquery-1.12.4.js"></script>
+    <script src="scripts/qunit-1.23.1.js"></script>
+    <script src="../util.js"></script>
+    <script src="../observable.js"></script>
+    <script>
+QUnit.test('observable.{on|off|notify}', function (assert) {
+  var o = observable({})
+  var called = 0
+
+  function foo() {
+    called++
+  }
+
+  o.on('foo', foo)
+  o.notify({type: 'foo'})
+
+  assert.ok(called === 1, 'foo is called')
+
+  o.off('foo', foo)
+  o.notify({type: 'foo'})
+
+  assert.ok(called === 1, 'foo is not called')
+})
+
+QUnit.test('observable.once', function (assert) {
+  var o = observable({})
+  var called = 0
+
+  function foo() {
+    called++
+  }
+
+  o.once('foo', foo)
+  o.notify({type: 'foo'})
+  o.notify({type: 'foo'})
+
+  assert.ok(called === 1, 'foo is called once')
+})
+
+QUnit.test('observableObject.prop', function (assert) {
+  var o = observableObject({})
+  var called = false
+
+  function foo(m) {
+    called = true
+    assert.ok(m.type === 'change', 'message type is change')
+    assert.ok(m.type === 'change', 'message key is foo')
+  }
+
+  o.on('change', foo)
+  o.prop('foo', 1)
+
+  assert.ok(called, 'foo is called')
+})
+    </script>
+  </body>
+</html>

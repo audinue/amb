@@ -1,0 +1,22 @@
+
+<style>
+.button.checked {
+  border: 1px solid #000;
+}
+</style>
+
+<button id="testButton" class="button">Click Me</button>
+
+<script src="class-util.js"></script>
+<script>
+
+
+testButton.onclick = function () {
+  if (hasClass(testButton, 'checked')) {
+    removeClass(testButton, 'checked')
+  } else {
+    addClass(testButton, 'checked')
+  }
+}
+
+</script>

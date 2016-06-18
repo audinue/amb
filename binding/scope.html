@@ -1,0 +1,10 @@
+<script src="util.js"></script>
+<script src="scope.js"></script>
+<script>
+var o = {foo: {bar: {baz: 2}}, bar: ['A', 'B']}
+var s = new Scope(o)
+
+s.val('foo.bar.baz', 'xxx')
+alert(o.foo.bar.baz)
+
+</script>

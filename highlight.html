@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+
+<!--<script src="binding/binding.js"></script>-->
+
+<h1>Highlight</h1>
+
+<script>
+
+function highlightHTML(string) {
+  var highlighted = string.replace(/<(\/?)([^\s>]+)(\s*[^>]*)>|&([^;]+);|(\n|\r\n)|([ ])/g, function (all, close, name, attributes, entity, newLine, space) {
+    if (space) {
+      return '&nbsp;'
+    }
+    if (newLine) {
+      return '<br>'
+    }
+    if (entity) {
+      return '<span class="entity">&amp;' + entity + ';</span>'
+    }
+    if (name) {
+      attributes = attributes.replace(/(\s+)([^=]+)(=(['"][^'"]+['"]))?/g, function (all, space, name, hasValue, value) {
+        if (hasValue) {
+          return space + '<span class="attribute-name">' + name + '</span><span class="operator">=</span><span class="attribute-value">' + value + '</span>'
+        }
+        return space + '<span class="attribute-name">' + name + '</span>'
+      })
+      return '<span class="operator">&lt;' + close + '</span><span class="element-name">' + name + '</span>' + attributes + '<span class="operator">&gt;</span>'
+    }
+  })
+  return highlighted
+}
+
+</script>
+
+<div data-component="html-highlight">
+  <script type="component-style">
+.operator {
+  color: gray;
+}
+.element-name {
+  color: blue;
+}
+.attribute-name {
+  color: orange;
+}
+.attribute-value {
+  color: green;
+}
+.entity {
+  color: brown;
+}
+  </script>
+  <script type="component-load">
+component.innerHTML = highlightHTML(component.source || '')
+component.on('change', function (message) {
+  if (message.key === 'source') {
+    component.innerHTML = highlightHTML(component.source)
+  }
+})
+  </script>
+</div>
+
+<div data-is="html-highlight" data-prop="source: '<p>Hello\nworld</p>'"></div>

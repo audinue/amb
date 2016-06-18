@@ -1,0 +1,86 @@
+<html>
+  <head>
+    <title>Playground</title>
+  </head>
+  <body>
+    <fieldset>
+      <legend>HTML</legend>
+      <textarea data-value="html" cols="40" rows="4"></textarea>
+    </fieldset>
+    <fieldset>
+      <legend>CSS</legend>
+      <textarea data-value="css" cols="40" rows="4"></textarea>
+    </fieldset>
+    <fieldset>
+      <legend>JS</legend>
+      <textarea data-value="js" cols="40" rows="4"></textarea>
+    </fieldset>
+    <fieldset>
+      <legend>Preview</legend>
+      <iframe id="preview"></iframe>
+    </fieldset>
+    <script src="binding.js"></script>
+    <script>
+var model = binding.convert({
+  html: '',
+  css: '',
+  js: ''
+})
+function documentOf (iframe) {
+  if (iframe.contentDocument) {
+    return iframe.contentDocument
+  } else if (iframe.contentWindow) {
+    return iframe.contentWindow.document
+  } else if (iframe.document) {
+    return iframe.document
+  }
+}
+function windowOf (iframe) {
+  if (iframe.contentWindow) {
+    return iframe.contentWindow
+  } else if (iframe.window) {
+    return iframe.window
+  }
+}
+window.onload = function () {
+  var document = documentOf(preview)
+  var head = document.head
+  if (!head) {
+    document.documentElement.appendChild(head = document.createElement('head'))
+  }
+  var body = document.body
+  var style = document.createElement('style')
+  head.appendChild(style)
+  var script = document.createElement('script')
+  head.appendChild(script)
+  model.on('change', function (message) {
+    switch (message.key) {
+      case 'html':
+        body.innerHTML = model.html
+        break;
+      case 'css':
+        var newStyle = document.createElement('style')
+        head.appendChild(newStyle)
+        if (newStyle.styleSheet) { // IE6
+          newStyle.styleSheet.cssText = model.css
+        } else {
+          newStyle.appendChild(document.createTextNode(model.css))
+        }
+        head.removeChild(style)
+        style = newStyle
+        break;
+      case 'js':
+        try {
+          windowOf(preview).eval(model.js)
+          //new windowOf(preview).Function(model.js)()
+        } catch (e) {
+          window.document.title = e.message + e.number
+        }
+        break;
+    }
+  })
+  binding.bind(model)
+}
+    </script>
+  </body>
+</html>

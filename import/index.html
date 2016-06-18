@@ -1,0 +1,58 @@
+<html>
+  <head>
+    <title></title>
+  </head>
+  <body>
+<div data-import="foo.html"></div>
+
+<script src="util.js"></script>
+<script src="path-normalize.js"></script>
+<script>
+
+function getImports (node, imports, directory) {
+  if (node.getAttribute) {
+    var _import = node.getAttribute('data-import')
+    if (_import !== null) {
+      imports.push(normalize(directory + _import))
+    }
+  }
+  foreach(node.childNodes, function (childNode) {
+    getImports(childNode, imports, directory)
+  })
+  return imports
+}
+
+function bind (object, element) {
+  var imports = getImports(element, [], location.href.replace(/[^\/]*$/, ''))
+  if (imports.length) {
+    //alert(imports)
+  } else {
+    //TODO ...
+  }
+}
+
+bind(null, document)
+
+function read (file, callback) {
+  var xhr = new (window.ActiveXObject || window.XMLHttpRequest)('Microsoft.XMLHTTP')
+  xhr.open('GET', file, true)
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === 4 && xhr.status === 200) {
+      callback(xhr.responseText)
+    }
+  }
+  xhr.send('')
+}
+
+window.onload = function () {
+  read('foo.html?' + Math.random(), function (s) {
+    var d = document.createElement('div')
+    d.innerHTML = 'X<div>' + s + '</div>'
+    d = d.lastChild
+    document.body.appendChild(d)
+  })
+}
+
+</script>
+  </body>
+</html>

@@ -1,0 +1,90 @@
+
+<div data-import="foo.html"></div>
+
+<script>
+
+function read (file, callback) {
+  var xhr = new (window.ActiveXObject || window.XMLHttpRequest)('Microsoft.XMLHTTP')
+  xhr.open('GET', file, true)
+  if (xhr.overrideMimeType) {
+    xhr.overrideMimeType('text/plain')
+  }
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === 4 && xhr.status === 200) {
+      callback(xhr.responseText)
+    }
+  }
+  xhr.send('')
+}
+
+function replace (node, file, callback) {
+  read(file, function (contents) {
+    var div = document.createElement('div')
+    div.innerHTML = 'X<div>' + contents + '</div>'
+    div = div.lastChild
+    var scripts = div.getElementsByTagName('script')
+    for (var k = 0, length3 = scripts.length; k < length3; k++) {
+      var script = scripts[k]
+      if ((script.getAttribute('src') === null || script.getAttribute('src') === '') 
+          && script.getAttribute('type') === null || script.getAttribute('type') === '') {
+        var newScript = document.createElement('script')
+        newScript.text = script.text
+        newScript.textContent = script.textContent
+        script.parentNode.replaceChild(newScript, script)
+      }
+    }
+    var fragment = document.createDocumentFragment()
+    var childNodes = div.childNodes
+    var nodes = []
+    for (var j = 0, length2 = childNodes.length; j < length2; j++) {
+      nodes.push(childNodes[j])
+    }
+    for (var i = 0, length = nodes.length; i < length; i++) {
+      var child = nodes[i]
+      if (child.nodeName === 'LINK'
+        || child.nodeName === 'STYLE'
+        || child.nodeName === 'SCRIPT') {
+          fragment.appendChild(child)
+      } else if (child.getAttribute) {
+          if (child.getAttribute('data-import') !== null
+              || child.getAttribute('data-component') !== null
+              || child.getAttribute('data-template') !== null) {
+            fragment.appendChild(child)
+          }
+      }
+    }
+    traverse(fragment, function () {
+      node.parentNode.replaceChild(fragment, node)
+      callback()
+    })
+  })
+}
+
+function traverse (node, callback) {
+  if (node.getAttribute) {
+    var dataImport = node.getAttribute('data-import')
+    if (dataImport !== null) {
+      replace(node, dataImport, callback)
+      return
+    }
+  }
+  var nodes = node.childNodes
+  var required = nodes.length
+  if (!required) {
+    callback()
+    return
+  }
+  for (var i = 0, length = nodes.length; i < length; i++) {
+    traverse(nodes[i], function () {
+      if (!--required) {
+        callback()
+      }
+    })
+  }
+}
+
+window.onload = function () {
+  traverse(document, function () {})
+}
+
+</script>

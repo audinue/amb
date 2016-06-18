@@ -1,0 +1,40 @@
+
+<style>
+img {
+  width: 100%;
+}
+</style>
+
+<button id="next">Next</button>
+<div id="chapterCount"></div>
+
+<div id="pages"></div>
+
+<script>
+var chapter = 1
+next.onclick = function () {
+  pages.innerHTML = ''
+  var xhr = new ActiveXObject('Microsoft.XMLHTTP')
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === 4) {
+      var srcs = eval(xhr.responseText)
+      var src
+      chapterCount.innerHTML = srcs.length
+      while (src = srcs.shift()) {
+        var page = document.createElement('img')
+        page.src = src
+        pages.appendChild(page)
+      }
+      delete xhr.onreadystatechange
+      xhr = null
+    }
+  }
+  xhr.open('GET', 'http://127.0.0.1/gos?chapter=' + chapter++, true)
+  xhr.send()
+}
+window.onunload = function () {
+  window.onunload = null
+  next.onclick = null
+  chapter = null
+}
+</script>

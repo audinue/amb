@@ -1,0 +1,11 @@
+<script src="foo.js"></script>
+
+<script>
+
+var r = new (window.ActiveXObject || window.XMLHttpRequest)('Microsoft.XMLHTTP')
+
+r.open('GET', 'foo.js', false)
+
+r.send()
+
+</script>

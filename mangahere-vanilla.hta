@@ -1,0 +1,103 @@
+
+<div class="header">
+  <input id="chapterURL">
+  <button id="load">Load</button>
+</div>
+
+<div id="pages"></div>
+
+<div class="footer">
+  <button id="backToTop">Back to Top</button>
+</div>
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  font-family: open sans;
+  font-size: 12px;
+}
+html {
+  background: #000;
+}
+.header, .footer {
+  padding: 10px;
+  text-align: center;
+}
+#chapterURL, #load, #backToTop {
+  border: none;
+  background: #fff;
+  height: 40px;
+  line-height: 20px;
+  padding: 10px;
+}
+#chapterURL {
+  width: 300px;
+}
+#pages img {
+  display: block;
+  width: 100%;
+  margin-bottom: 10px;
+}
+</style>
+
+<script>
+
+chapterURL.onfocus = function () {
+  chapterURL.select()
+}
+
+load.onclick = function () {
+  pages.innerHTML = ''
+  read(chapterURL.value, function (text) {
+    var match = text.match(/<select[\s\S]*?>([\s\S]+?)<\/select>/)
+    match[1].replace(/<option value="([\s\S]*?)"/g, function (all, url) {
+      var page = document.createElement('img')
+      page.onerror = function () {
+        if (/a\.mhcdn\.net/.test(this.src)) {
+          page.src = page.src.replace(/a\.mhcdn\.net/, 'c.mhcdn.net')
+        }
+        else if (/c\.mhcdn\.net/.test(this.src)) {
+          page.src = page.src.replace(/c\.mhcdn\.net/, 'z.mhcdn.net')
+        }
+      }
+      page.onload = function () {
+        page.onload = null
+        page.onerror = null
+        page = null
+      }
+      pages.appendChild(page)
+      read(url, function (text) {
+        var match = text.match(/<img src="([\s\S]*?)"/)
+        page.src = match[1]
+      })
+    })
+  })
+}
+
+load.onkeydown = function () {
+  if (event.keyCode === 13) load.onclick()
+}
+
+backToTop.onclick = function () {
+  window.scrollTo(0, 0)
+}
+
+function read (url, callback) {
+  var xhr = new ActiveXObject('Microsoft.XMLHTTP')
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === 4) {
+      if (xhr.status === 200) {
+        callback(xhr.responseText, false)
+      } else {
+        callback('', true)
+      }
+      delete xhr.onreadystatechange
+      xhr = null
+    }
+  }
+  xhr.open('GET', url, true)
+  xhr.send()
+}
+
+</script>

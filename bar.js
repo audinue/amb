@@ -1,0 +1,2 @@
+
+alert(typeof foo)

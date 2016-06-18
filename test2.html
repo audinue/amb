@@ -1,0 +1,92 @@
+
+<h1>Test2</h1>
+
+<div data-import="highlight.html"></div>
+
+<div data-component="test">
+  <div class="header">
+    <a data-on="click: showPreview" href="#" data-class="active: isPreview">Preview</a>
+    <a data-on="click: showHTML" href="#" data-class="active: !isPreview">HTML</a>
+  </div>
+  <div class="content">
+    <div class="source" data-is="html-highlight" data-prop="source: source" data-visible="!isPreview"></div>
+    <iframe data-visible="isPreview" frameborder="0"></iframe>
+  </div>
+  <script type="component-style">
+:scope {
+  padding: 5px;
+  font-size: 11.5pt;
+}
+a {
+  display: block;
+  float: right;
+  padding: 5px 10px;
+  text-decoration: none;
+  color: #000;
+  background: #ccc;
+  border: 1px solid #ccc;
+  border-bottom: none;
+  position: relative;
+  z-index: 1;
+  top: 1px;
+}
+a.active {
+  background: #fff;
+}
+a:hover {
+  background: #eee;
+}
+.content {
+  padding: 5px 10px;
+  height: 200px;
+}
+.content {
+  clear: right;
+  background: #fff;
+  border: 1px solid #ccc;
+}
+iframe, .source {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: auto;
+}
+.source {
+  font-size: 10pt;
+}
+  </script>
+  <script type="component-init">
+component.prop({
+  isPreview: true,
+  showHTML: function (e) {
+    this.prop('isPreview', false)
+    if (e.preventDefault) e.preventDefault()
+    else e.returnValue = true
+    return false
+  },
+  showPreview: function (e) {
+    this.prop('isPreview', true)
+    if (e.preventDefault) e.preventDefault()
+    else e.returnValue = true
+    return false
+  }
+})
+  </script>
+  <script type="component-load">
+var html = component.prevContents.firstChild
+html = html.nodeName === '#comment' ? html : html.nextSibling
+html = html.text || html.textContent
+html = html.replace(/^\s*<!--\s*/, '').replace(/\s*-->\s*$/, '')
+html = html.replace(/^\s*/, '').replace(/\s*$/, '')
+var iframe = component.getElementsByTagName('iframe')[0]
+iframe.contentWindow.binding = binding
+component.prop('source', html)
+var doc = iframe.contentDocument || iframe.contentWindow.document
+doc.open()
+iframe.contentWindow.binding = binding
+doc.write(html)
+doc.close()
+  </script>
+</div>

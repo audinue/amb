@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+
+<script src="binding/script.js"></script>
+
+<div data-import="test2.html"></div>
+
+<h2>data-text</h2>
+
+<div data-is="test">
+<!--
+<p>Hello <span data-text="name"></span>!</p>
+<p><input data-value="name"></p>
+
+<script>
+binding.bind(binding.convert({
+  name: 'John'
+}), document)
+</script>
+-->
+</div>
+
+<h2>data-html</h2>
+
+<div data-is="test">
+<!--
+<p>Hello <span data-html="name"></span>!</p>
+<p><input data-value="name"></p>
+
+<script>
+binding.bind(binding.convert({
+  name: '<b>John Doe</b>'
+}), document)
+</script>
+-->
+</div>
+
+<h2>data-prop</h2>
+
+<div data-is="test">
+<!--
+<p data-prop="align: alignment">Hello world!</p>
+<p><input data-value="alignment"></p>
+
+<script>
+binding.bind(binding.convert({
+  alignment: 'center'
+}), document)
+</script>
+-->
+</div>
+
+<h2>data-style</h2>
+
+<div data-is="test">
+<!--
+<p data-style="color: color">Hello world!</p>
+<p><input data-value="color"></p>
+
+<script>
+binding.bind(binding.convert({
+  color: 'red'
+}), document)
+</script>
+-->
+</div>
+
+<h2>data-attr</h2>
+
+<div data-is="test">
+<!--
+<p data-attr="align: alignment">Hello world!</p>
+<p><input data-value="alignment"></p>
+
+<script>
+binding.bind(binding.convert({
+  alignment: 'center'
+}), document)
+</script>
+-->
+</div>
+
+<h2>data-class</h2>
+
+<div data-is="test">
+<!--
+<style>
+.is-bold {
+  font-weight: bold;
+}
+</style>
+
+<p data-class="is-bold: bold">Hello world!</p>
+<p><input data-value="bold"></p>
+
+<script>
+binding.bind(binding.convert({
+  bold: 'truthy'
+}), document)
+</script>
+-->
+</div>
+
+<h2>data-visible</h2>
+
+<div data-is="test">
+<!--
+<p data-visible="visible">Hello world!</p>
+<p><input data-value="visible"></p>
+
+<script>
+binding.bind(binding.convert({
+  visible: 'truthy'
+}), document)
+</script>
+-->
+</div>
+
+<h2>data-if</h2>
+
+<div data-is="test">
+<!--
+<p data-if="visible">Hello world!</p>
+<p><input data-value="visible"></p>
+
+<script>
+binding.bind(binding.convert({
+  visible: 'truthy'
+}), document)
+</script>
+-->
+</div>
+
+<script>
+binding.bind()
+</script>

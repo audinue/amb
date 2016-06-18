@@ -1,0 +1,36 @@
+
+<textarea id="sharedTextArea" cols="80" rows="8"></textarea>
+
+<script src="json2.js"></script>
+<script src="request.js"></script>
+<script src="observable-server.js"></script>
+<script src="position.js"></script>
+<script>
+window.onload = function () {
+  var sharedTextArea = document.getElementById('sharedTextArea')
+  var id = 'xxxxxxxx'.replace(/x/g, function () {
+    return Math.floor(Math.random() * 10)
+  })
+  var server = observableServer({
+    url: 'http://192.168.56.7:9000/event'
+  })
+  server.on('change', function (message) {
+    if (message.id === id) {
+      return
+    }
+    sharedTextArea.value = message.value
+    setCursorPosition(sharedTextArea, message.selectionStart)
+    sharedTextArea.scrollTop = message.scrollTop
+  })
+  var timeout
+  sharedTextArea.onkeyup = function () {
+    server.notify({
+      type: 'change',
+      id: id,
+      value: sharedTextArea.value,
+      selectionStart: getCursorPosition(sharedTextArea),
+      scrollTop: sharedTextArea.scrollTop
+    })
+  }
+}
+</script>

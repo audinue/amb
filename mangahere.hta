@@ -1,0 +1,112 @@
+<script src="binding/script.js"></script>
+
+<script>
+function read (url, callback) {
+  var xhr = new ActiveXObject('Microsoft.XMLHTTP')
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === 4) {
+      if (xhr.status === 200) {
+        callback(xhr.responseText, false)
+      } else {
+        callback('', true)
+      }
+      delete xhr.onreadystatechange
+      xhr = null
+    }
+  }
+  xhr.open('GET', url, true)
+  xhr.send()
+}
+
+function Page(url) {
+  binding.convert(this)
+  
+  this.load = function () {
+    var self = this
+    read(url, function (text) {
+      var match = text.match(/<img src="([\s\S]*?)"/)
+      self.prop('src', match[1])
+      self = null
+    })
+    return self
+  }
+  
+  this.error = function () {
+    if (/a\.mhcdn\.net/.test(this.src)) {
+      this.prop('src', this.src.replace(/a\.mhcdn\.net/, 'c.mhcdn.net'))
+    }
+    else if (/c\.mhcdn\.net/.test(this.src)) {
+      this.prop('src', this.src.replace(/c\.mhcdn\.net/, 'z.mhcdn.net'))
+    }
+  }
+}
+
+document.prop({
+  pages: binding.convert([]),
+  url: '',
+  load: function () {
+    var self = this
+    self.pages.clear()
+    read(self.url, function (text) {
+      var match = text.match(/<select[\s\S]*?>([\s\S]+?)<\/select>/)
+      match[1].replace(/<option value="([\s\S]*?)"/g, function (all, url) {
+        self.pages.append(new Page(url).load())
+      })
+      self = null
+    })
+  },
+  backToTop: function () {
+    window.scrollTo(0, 0)
+  },
+  focus: function (e) {
+    e.srcElement.select()
+  }
+})
+</script>
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  font-family: arial;
+  font-size: 10pt;
+}
+body {
+  background: #000;
+}
+img {
+  width: 100%;
+  display: block;
+  margin-bottom: 10px;
+}
+.form {
+  text-align: center;
+  padding: 10px;
+}
+.form * {
+  border: none;
+  background: #fff;
+  color: #000;
+  height: 40px;
+  padding: 10px;
+}
+input {
+  width: 300px;
+}
+button {
+  cursor: pointer;
+}
+</style>
+
+<div class="form">
+  <input data-value="url" data-on="focus: focus">
+  <button data-on="click: load">Load</button>
+</div>
+
+<div data-foreach="pages">
+  <img data-attr="src: src" data-on="error: error">
+</div>
+
+<div class="form">
+  <button data-on="click: backToTop">Back to Top</button>
+</div>

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+
+<!--<script src="binding/script.js"></script>-->
+
+<style>
+.dialog, .dialog * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+.dialog {
+  position: absolute;
+  border: 1px solid #aaa;
+  background: #fff;
+}
+.dialog-is-minimized {
+  display: none;
+}
+.dialog-is-maximized {
+  left: 0 !important;
+  top: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+.dialog-is-activated {
+  border: 1px solid #888;
+}
+.dialog .header {
+  height: 30px;
+  line-height: 30px;
+}
+.dialog .caption, .dialog .buttons div {
+  font-family: open sans;
+  font-size: 12px;
+  padding: 0 10px;
+}
+.dialog .caption {
+  font-weight: bold;
+}
+.dialog .buttons {
+  float: right;
+}
+.dialog .buttons div {
+  float: left;
+  cursor: pointer;
+  color: #aaa;
+}
+.dialog .buttons div:hover {
+  background: #eee;
+  color: #000;
+}
+.dialog .resize {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 24px;
+  height: 24px;
+  cursor: se-resize;
+}
+.dialog .content-is-down {
+  -webkit-pointer-events: none;
+  pointer-events: none;
+}
+.dialog .content {
+  width: 100%;
+  height: 100%;
+  height: -webkit-calc(100% - 30px);
+  height: -moz-calc(100% - 30px);
+  height: calc(100% - 30px);
+}
+.dialog .content * {
+  width: 100%;
+  height: 100%;
+  border: none;
+  padding: 5px;
+}
+</style>
+<script src="binding/util.js"></script>
+<script>
+window.dialogs = binding.convert({
+  created: [],
+  isDown: false,
+  lastZIndex: 0,
+  activate: function (e, dialog) {
+    foreach(this.created, function (value) {
+      if (value !== dialog) {
+        value.prop('isActivated', false)
+      }
+    })
+    dialog.prop({
+      zIndex: this.lastZIndex++,
+      isActivated: true
+    })
+  },
+  minimize: function (e, dialog) {
+    dialog.prop({
+      isMinimized: true,
+      isActivated: false
+    })
+    var notMinimized
+    foreach(this.created, function (value) {
+      if (!notMinimized && !value.isMinimized) {
+        notMinimized = value
+      }
+    })
+    if (notMinimized) {
+      this.activate(null, notMinimized)
+    }
+  }
+}, true)
+</script>
+
+<div data-component="dialog">
+  <div class="dialog" data-style="left: left + 'px'; top: top + 'px'; width: width + 'px'; height: height + 'px'; zIndex: zIndex" data-class="dialog-is-minimized: isMinimized; dialog-is-maximized: isMaximized; dialog-is-activated: isActivated" data-on="mousedown: dialogs.activate">
+    <div class="header">
+      <div class="buttons">
+        <div class="minimize" data-on="click: dialogs.minimize">Minimize</div>
+        <div class="maximize" data-text="isMaximized ? 'Restore' : 'Maximize'" data-on="click: maximize"></div>
+      </div>
+      <div class="caption" data-text="caption" data-on="mousedown: move"></div>
+    </div>
+    <div data-id="content" class="content" data-class="content-is-down: dialogs.isDown"></div>
+    <div class="resize" data-on="mousedown: resize"></div>
+  </div>
+  <script type="component-init">
+component.prop({
+  left: 0 + Math.random() * 200,
+  top: 0 + Math.random() * 200,
+  width: 300,
+  height: 200,
+  caption: 'Untitled',
+  down: null,
+  isMaximized: false,
+  isMinimized: false,
+  isActivated: true,
+  zIndex: 0,
+  move: function (e) {
+    if (e.preventDefault) {
+      e.preventDefault()
+    } else {
+      e.returnValue = false
+    }
+    if (this.isMaximized) return
+    var pageX = e.pageX
+    var pageY = e.pageY
+    if (pageX === undefined) {
+      pageX = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft
+      pageY = e.clientY + document.body.scrollTop + document.documentElement.scrollTop
+    }
+    this.prop({
+      down: 'move',
+      offsetX: pageX - this.left,
+      offsetY: pageY - this.top
+    })
+    dialogs.prop('isDown', true)
+    return false
+  },
+  resize: function (e) {
+    if (e.preventDefault) {
+      e.preventDefault()
+    } else {
+      e.returnValue = false
+    }
+    if (this.isMaximized) return
+    var pageX = e.pageX
+    var pageY = e.pageY
+    if (pageX === undefined) {
+      pageX = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft
+      pageY = e.clientY + document.body.scrollTop + document.documentElement.scrollTop
+    }
+    this.prop({
+      down: 'resize',
+      offsetX: pageX - this.width,
+      offsetY: pageY - this.height
+    })
+    dialogs.prop('isDown', true)
+    return false
+  },
+  maximize: function () {
+    this.prop('isMaximized', !this.isMaximized)
+  }
+})
+binding.on(document, 'mousemove', function (e) {
+  var pageX = e.pageX
+  var pageY = e.pageY
+  if (pageX === undefined) {
+    pageX = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft
+    pageY = e.clientY + document.body.scrollTop + document.documentElement.scrollTop
+  }
+  if (component.down === 'move') {
+    component.prop({
+      left: pageX - component.offsetX,
+      top: pageY - component.offsetY
+    })
+  } else if (component.down === 'resize') {
+    component.prop({
+      width: pageX - component.offsetX,
+      height: pageY - component.offsetY
+    })
+  }
+})
+binding.on(document, 'mouseup', function () {
+  component.prop('down', null)
+  dialogs.prop('isDown', false)
+})
+dialogs.created.append(component)
+dialogs.activate(null, component)
+  </script>
+  <script type="component-load">
+component.getElement('content').appendChild(component.prevContents)
+  </script>
+</div>
+
+<style>
+.dialog-bar, .dialog-bar * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+.dialog-bar {
+  display: block;
+  list-style-type: none;
+  border: 1px solid #ccc;
+  border-radius: 1px;
+  background: #fff;
+  height: 30px;
+}
+.dialog-bar li.is-minimized {
+  color: #ccc;
+}
+.dialog-bar li.is-activated {
+  color: #000;
+}
+.dialog-bar li {
+  float: left;
+  font-family: open sans;
+  font-size: 12px;
+  padding: 0 10px;
+  height: 30px;
+  line-height: 30px;
+  cursor: pointer;
+  color: #aaa;
+}
+.dialog-bar li:hover {
+  background: #eee;
+  color: #000;
+}
+</style>
+
+<div data-component="dialog-bar">
+  <ul class="dialog-bar" data-foreach="dialogs.created">
+    <li data-text="caption" data-class="is-minimized: isMinimized; is-activated: isActivated" data-on="click: $parent.restore"></li>
+  </ul>
+  <script type="component-init">
+component.prop({
+  restore: function (e, dialog) {
+    if (e.preventDefault) {
+      e.preventDefault()
+    } else {
+      e.returnValue = false
+    }
+    if (dialog.isMinimized) {
+      dialog.prop('isMinimized', false)
+      dialogs.activate(null, dialog)
+    } else {
+      if (dialog.isActivated) {
+        dialogs.minimize(null, dialog)
+      } else {
+        dialogs.activate(null, dialog)
+      }
+    }
+  }
+})
+  </script>
+</div>
+
+<div data-is="dialog-bar"></div>
+
+<div data-is="dialog" data-prop="caption: 'HTML'">
+  <textarea></textarea>
+</div>
+<div data-is="dialog" data-prop="caption: 'CSS'">
+  <textarea></textarea>
+</div>
+<div data-is="dialog" data-prop="caption: 'JS'">
+  <iframe></iframe>
+</div>
+<!--<script>
+bind()
+</script>-->
